@@ -493,7 +493,11 @@ function G.draw()
     elseif currentScene == SCENES.Credits then
     elseif currentScene == SCENES.Help then
     elseif currentScene == SCENES.Encyclopedia then
-        love.graphics.draw(sceneBackgrounds.encyclopedia1)
+        if successCount > successThreshold1 then
+            love.graphics.draw(sceneBackgrounds.encyclopedia[currentEncyclopediaPage])
+        else
+            love.graphics.draw(sceneBackgrounds.encyclopediaEarly)
+        end
     end
 
     love.graphics.printf(mouseDebugText, 0, 0, 200, "left")
@@ -1009,6 +1013,18 @@ function G.keyPressed(key)
         blenderBottle.ingreds = {}
         bowlBag.ingreds = {}
         panPot.ingreds = {}
+    elseif key == "left" then
+        if currentScene == SCENES.Encyclopedia and successCount > successThreshold1 then
+            if currentEncyclopediaPage > 1 then
+                currentEncyclopediaPage = currentEncyclopediaPage - 1
+            end
+        end
+    elseif key == "right" then
+        if currentScene == SCENES.Encyclopedia and successCount > successThreshold1 then
+            if currentEncyclopediaPage < table.getn(sceneBackgrounds.encyclopedia) then
+                currentEncyclopediaPage = currentEncyclopediaPage + 1
+            end
+        end
     end
 
 end
@@ -1045,9 +1061,11 @@ function LoadSceneBackgrounds()
         cave = love.graphics.newImage("/assets/cave.png"),
         --credits = love.graphics.newImage("/assets/credits.png"),
         --help = love.graphics.newImage("/assets/help.png"),
-        encyclopedia1 = love.graphics.newImage("/assets/encyclopedia_1.png"),
-        encyclopedia2 = love.graphics.newImage("/assets/encyclopedia_2.png"),
-        encyclopedia3 = love.graphics.newImage("/assets/encyclopedia_3.png")
+        encyclopedia = {
+            love.graphics.newImage("/assets/encyclopedia_2.png"),
+            love.graphics.newImage("/assets/encyclopedia_3.png")
+        },
+        encyclopediaEarly = love.graphics.newImage("/assets/encyclopedia_1.png")
     }
 
 end
