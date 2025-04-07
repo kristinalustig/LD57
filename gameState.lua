@@ -1,8 +1,8 @@
-I = require "ingredients"
-R = require "recipes"
-A = require "adventurers"
-
 G = {}
+
+local I = require "ingredients"
+local R = require "recipes"
+local A = require "adventurers"
 
 local ingredients
 local recipes
@@ -77,7 +77,7 @@ function G.load(cs)
     showPan = false
     showLiquids = false
     successThreshold1 = 4
-    successThreshold2 = 20
+    successThreshold2 = 10
     mouseDebugText = ""
     whichQuad = 1
     currentAdventurer = nil
@@ -118,6 +118,8 @@ function G.load(cs)
     LoadClickTargetAreas()
 
     love.graphics.setFont(textFontLg)
+    currentAdventurer = adventurers[11]
+    visitorPresent = true
 
 end
 
@@ -147,7 +149,7 @@ function G.update(dt)
                     tenTimer = tenTimer - 1
                     if tenTimer <= 0 then
                         currentAdventurer.alpha = .95
-                        tenTimer = 100
+                        tenTimer = 300
                         successCount = successCount + 1
                     end
                 end
@@ -493,14 +495,12 @@ function G.draw()
     elseif currentScene == SCENES.Credits then
     elseif currentScene == SCENES.Help then
     elseif currentScene == SCENES.Encyclopedia then
-        if successCount > successThreshold1 then
+        if successCount >= successThreshold1 then
             love.graphics.draw(sceneBackgrounds.encyclopedia[currentEncyclopediaPage])
         else
             love.graphics.draw(sceneBackgrounds.encyclopediaEarly)
         end
     end
-
-    love.graphics.printf(mouseDebugText, 0, 0, 200, "left")
 
 end
 
@@ -593,7 +593,7 @@ function ChooseNextVisitor()
     adventurers[pickNum].currentDialog = dialog
     adventurers[pickNum].manaPercent = love.math.random(100)
 
-    return visitor
+    return adventurers[pickNum]
 
 end
 
@@ -662,23 +662,32 @@ function ChooseEligibleVisitors()
     elseif successCount < successThreshold2 then
         if adventurers[1].successNum < 4 then
             table.insert(choices, 1)
-        elseif adventurers[2].successNum < 3 then
+        end
+        if adventurers[2].successNum < 3 then
             table.insert(choices, 2)
-        elseif adventurers[3].successNum < 1 then
+        end
+        if adventurers[3].successNum < 1 then
             table.insert(choices, 3)
-        elseif adventurers[4].successNum < 4 then
+        end
+        if adventurers[4].successNum < 4 then
             table.insert(choices, 4)
-        elseif adventurers[5].successNum < 5 then
+        end
+        if adventurers[5].successNum < 5 then
             table.insert(choices, 5)
-        elseif adventurers[6].successNum < 2 then
+        end
+        if adventurers[6].successNum < 2 then
             table.insert(choices, 6)
-        elseif adventurers[7].successNum < 2 then
+        end
+        if adventurers[7].successNum < 2 then
             table.insert(choices, 7)
-        elseif adventurers[8].successNum < 2 then
+        end
+        if adventurers[8].successNum < 2 then
             table.insert(choices, 8)
-        elseif adventurers[9].successNum < 3 then
+        end
+        if adventurers[9].successNum < 3 then
             table.insert(choices, 9)
-        elseif adventurers[11].successNum < 2 then
+        end
+        if adventurers[11].successNum < 2 then
             table.insert(choices, 11)
         end
     else
@@ -705,7 +714,7 @@ end
 
 function SubmitProduct()
 
-    local recipeMadeId = IdentifyRecipe(currentlyHeld.ingreds[1], currentlyHeld.ingreds[2], false)
+    local recipeMadeId = IdentifyRecipe(currentlyHeld.ingreds[1], currentlyHeld.ingreds[2], currentlyHeld.methodId, false)
 
     currentlyHeld = nil
     blenderBottle.ingreds = {}
@@ -716,6 +725,7 @@ function SubmitProduct()
     for k, v in ipairs(currentAdventurer.dialog.recipeIds) do
         if v == recipeMadeId and k == currentAdventurer.successNum + 1 then 
             currentAdventurer.successNum = currentAdventurer.successNum + 1
+            successCount = successCount + 1
             currentAdventurer.lastTime = "good"
             currentAdventurer.alpha = .99
             goodText = "Recipe was correct!"
@@ -732,7 +742,7 @@ function SubmitProduct()
 
 end
 
-function IdentifyRecipe(a, b, shareInfo)
+function IdentifyRecipe(a, b, mid, shareInfo)
 
     local searchFor
 
@@ -743,7 +753,7 @@ function IdentifyRecipe(a, b, shareInfo)
     end
 
     for k, v in ipairs(recipes) do
-        if v.ingredients == searchFor then 
+        if v.ingredients == searchFor and v.method == mid then 
             if v.discovered == false and showInfo then
                 goodText = "Discovered new recipe: "..v.name
             elseif showInfo then
@@ -782,7 +792,7 @@ function TakeClickAction(n)
                 blenderState = 2
             elseif blenderState == 3 then
                 blenderBottle.ingreds = inBlender
-                IdentifyRecipe(blenderBottle.ingreds[1], blenderBottle.ingreds[2], true)
+                IdentifyRecipe(blenderBottle.ingreds[1], blenderBottle.ingreds[2], 2, true)
                 currentlyHeld = blenderBottle
                 inBlender = {}
                 blenderState = 1
@@ -794,7 +804,7 @@ function TakeClickAction(n)
                 bowlState = 2
             elseif bowlState == 3 then
                 bowlBag.ingreds = inBowl
-                IdentifyRecipe(bowlBag.ingreds[1], bowlBag.ingreds[2], true)
+                IdentifyRecipe(bowlBag.ingreds[1], bowlBag.ingreds[2], 1, true)
                 currentlyHeld = bowlBag
                 inBowl = {}
                 bowlState = 1
@@ -806,7 +816,7 @@ function TakeClickAction(n)
                 panState = 2
             elseif panState == 3 then
                 panPot.ingreds = inPan
-                IdentifyRecipe(panPot.ingreds[1], panPot.ingreds[2], true)
+                IdentifyRecipe(panPot.ingreds[1], panPot.ingreds[2], 3, true)
                 currentlyHeld = panPot
                 inPan = {}
                 panState = 1
@@ -1014,13 +1024,13 @@ function G.keyPressed(key)
         bowlBag.ingreds = {}
         panPot.ingreds = {}
     elseif key == "left" then
-        if currentScene == SCENES.Encyclopedia and successCount > successThreshold1 then
+        if currentScene == SCENES.Encyclopedia and successCount >= successThreshold1 then
             if currentEncyclopediaPage > 1 then
                 currentEncyclopediaPage = currentEncyclopediaPage - 1
             end
         end
     elseif key == "right" then
-        if currentScene == SCENES.Encyclopedia and successCount > successThreshold1 then
+        if currentScene == SCENES.Encyclopedia and successCount >= successThreshold1 then
             if currentEncyclopediaPage < table.getn(sceneBackgrounds.encyclopedia) then
                 currentEncyclopediaPage = currentEncyclopediaPage + 1
             end
@@ -1217,15 +1227,15 @@ function LoadAdventurers()
     adventurers = {
         A.new(1, "Waldorf", "Wizard", love.graphics.newQuad(0, 0, mult*4, mult*4, adventurerTexture), 0, 30),
         A.new(2, "Hurgle", "Warrior", love.graphics.newQuad(0, mult*4, mult*5, mult*5, adventurerTexture), 0, -48),
-        A.new(3, "Sporseesa", "Warlock", love.graphics.newQuad(0, mult*10, mult*3, mult*4, adventurerTexture), 0, 0),
+        A.new(3, "Sporseesa", "Warlock", love.graphics.newQuad(0, mult*10, mult*3, mult*4, adventurerTexture), 0, 30),
         A.new(4, "Kronkle", "Knight", love.graphics.newQuad(0, mult*14, mult*5, mult*5, adventurerTexture), 0, 0),
         A.new(5, "Jolie", "Mage", love.graphics.newQuad(0, mult*18, mult*4, mult*4, adventurerTexture), 0, 0),
-        A.new(6, "Mippie", "Star Fighter", love.graphics.newQuad(0, mult*23, mult*4, mult*4, adventurerTexture), 0, 0),
-        A.new(7, "XB-394Q", "Backup", love.graphics.newQuad(0, mult*27, mult*4, mult*5, adventurerTexture), 0, 0),
-        A.new(8, "Willow", "Rogue", love.graphics.newQuad(0, mult*32, mult*4, mult*4, adventurerTexture), 0, 0),
+        A.new(6, "Mippie", "Star Fighter", love.graphics.newQuad(0, mult*22, mult*4, mult*4, adventurerTexture), 0, 0),
+        A.new(7, "XB-394Q", "Backup", love.graphics.newQuad(0, mult*27, mult*4, mult*5, adventurerTexture), 0, 20),
+        A.new(8, "Willow", "Rogue", love.graphics.newQuad(0, mult*31, mult*4, mult*4, adventurerTexture), 0, 20),
         A.new(9, "Gargaro", "Archer", love.graphics.newQuad(0, mult*35, mult*4, mult*3, adventurerTexture), 0, 100),
         A.new(10, "???", "???", love.graphics.newQuad(0, mult*38, mult*4, mult*2, adventurerTexture), 0, 0),
-        A.new(11, "King Steve", "Supervisor", love.graphics.newQuad(0, mult*41, mult*4, mult*4, adventurerTexture), 0, 0)
+        A.new(11, "King Steve", "Supervisor", love.graphics.newQuad(0, mult*40, mult*4, mult*4, adventurerTexture), 0, 20)
     }
 
 end
@@ -1258,6 +1268,7 @@ function LoadMiscAssets()
 
     blenderBottle = {
         id = 100,
+        methodId = 2,
         ingreds = {},
         quad = miscAssets.blenderBottle,
         offsetX = 24,
@@ -1267,6 +1278,7 @@ function LoadMiscAssets()
     }
     bowlBag = {
         id = 200,
+        methodId = 1,
         ingreds = {},
         quad = miscAssets.bowlBag,
         offsetX = 30,
@@ -1276,6 +1288,7 @@ function LoadMiscAssets()
     }
     panPot = {
         id = 300,
+        methodId = 3,
         ingreds = {},
         quad = miscAssets.panPot,
         offsetX = 20,

@@ -434,7 +434,7 @@ function C.getDialog(id)
             keptStats = "I feel invigorated by our last transaction!",
             flavor = {
                 "Nobody told me how tough it'd be to shoot arrows in the dark.",
-                "I hear that someone up ahead is selling arros that shoot around corners!",
+                "I hear someone up ahead is selling arrows that shoot around corners!",
                 "The arrows-around-corners thing didn't pan out. Physics or something.",
                 "The cave ahead is really big - perfect for my arrows!",
                 "The next cave will be my last!"

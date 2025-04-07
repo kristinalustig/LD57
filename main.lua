@@ -1,4 +1,4 @@
-local G = require "gameState"
+G = require "gameState"
 
 SCENES = {
     Title = 1,
@@ -10,8 +10,6 @@ SCENES = {
 }
 
 local currentScene = SCENES.Title
-
-ISDEBUG = true
 
 function love.load()
 
@@ -28,11 +26,6 @@ end
 function love.draw()
 
     G.draw()
-
-    if ISDEBUG then
-        local mx, my = love.mouse.getPosition()
-        love.graphics.printf(mx .. ", " .. my, mx+20, my, 100, "left")
-    end
 
 end
 
