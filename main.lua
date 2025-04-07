@@ -9,7 +9,7 @@ SCENES = {
     Encyclopedia = 6
 }
 
-local currentScene = SCENES.Cave
+local currentScene = SCENES.Title
 
 ISDEBUG = true
 
@@ -52,4 +52,10 @@ function love.keypressed(key, _, _)
 
     G.keyPressed(key)
     
+end
+
+function love.mousemoved(x, y, dx, dy)
+
+    G.mouseMoved(x, y, dx, dy)
+
 end
